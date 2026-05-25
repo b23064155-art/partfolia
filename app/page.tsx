@@ -1146,14 +1146,14 @@ export default function Home() {
                   <div className="about-card-icon">📧</div>
                   <div>
                     <div className="about-card-label">Email</div>
-                    <div className="about-card-value">biloljonkomiljonov@gmail.com</div>
+                    <div className="about-card-value">b23064155@gmail.com</div>
                   </div>
                 </div>
                 <div className="about-card reveal">
                   <div className="about-card-icon">📱</div>
                   <div>
                     <div className="about-card-label">Phone</div>
-                    <div className="about-card-value">+998 90 520 03 50</div>
+                    <div className="about-card-value">+998 95 020 51 61</div>
                   </div>
                 </div>
                 <div className="about-card reveal">
@@ -1520,24 +1520,24 @@ export default function Home() {
                     Yangi loyiha, hamkorlik yoki shunchaki salom aytish uchun murojaat qiling.
                     Har doim ochiqman.
                   </p>
-                  <a href="mailto:akamljonmordayev@gmail.com" className="btn-primary" style={{ display: "inline-flex" }}>
+                  <a href="mailto:b23064155@gmail.com" className="btn-primary" style={{ display: "inline-flex" }}>
                     📧 Email Yuborish
                   </a>
                 </div>
                 <div className="contact-links">
-                  <a href="mailto:akamljonmordayev@gmail.com" className="contact-link">
+                  <a href="mailto:b23064155@gmail.com" className="contact-link">
                     <div className="contact-link-icon">📧</div>
                     <div className="contact-link-info">
                       <div className="contact-link-label">Email</div>
-                      <div className="contact-link-value">akamljonmordayev@gmail.com</div>
+                      <div className="contact-link-value">b23064155@gmail.com</div>
                     </div>
                     <div className="contact-link-arrow">→</div>
                   </a>
-                  <a href="tel:+998905200350" className="contact-link">
+                  <a href="tel:+998950205161" className="contact-link">
                     <div className="contact-link-icon">📱</div>
                     <div className="contact-link-info">
                       <div className="contact-link-label">Phone / Telegram</div>
-                      <div className="contact-link-value">+998 90 520 03 50</div>
+                      <div className="contact-link-value">+998 95 020 51 61</div>
                     </div>
                     <div className="contact-link-arrow">→</div>
                   </a>
@@ -1576,7 +1576,7 @@ export default function Home() {
               <a href="https://github.com/biloljonkomiljonov" target="_blank" rel="noopener noreferrer" className="footer-social">⌨️</a>
               <a href="https://t.me/biloljonkomiljonov" target="_blank" rel="noopener noreferrer" className="footer-social">✈️</a>
               <a href="https://linkedin.com" target="_blank" rel="noopener noreferrer" className="footer-social">💼</a>
-              <a href="mailto:akamljonmordayev@gmail.com" className="footer-social">📧</a>
+              <a href="mailto:b23064155@gmail.com" className="footer-social">📧</a>
             </div>
           </div>
           <div>
@@ -1604,8 +1604,8 @@ export default function Home() {
           <div>
             <div className="footer-col-title">Contact</div>
             <ul className="footer-links">
-              <li><a href="mailto:akamljonmordayev@gmail.com">Gmail</a></li>
-              <li><a href="tel:+998905200350">+998 90 520 03 50</a></li>
+              <li><a href="mailto:b23064155@gmail.com">Gmail</a></li>
+              <li><a href="tel:+998950205161">+998 95 020 51 61</a></li>
               <li><a href="https://t.me/biloljonkomiljonov" target="_blank" rel="noopener noreferrer">Telegram</a></li>
               <li><a href="https://github.com/biloljonkomiljonov" target="_blank" rel="noopener noreferrer">GitHub</a></li>
             </ul>
