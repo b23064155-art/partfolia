@@ -2,26 +2,23 @@ import type { Metadata } from "next";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "Komiljonov Biloljon — Full-Stack Developer | React, Next.js, Node.js",
+  title: "Biloljon Komiljonov — 13 yoshli Frontend Developer",
   description:
-    "Komiljonov Biloljon — 4+ yillik tajribali Full-Stack Developer. React, Next.js, Node.js, TypeScript, MongoDB, Express.js va AI Engineering bo'yicha mutaxassis. Premium portfolio.",
+    "Biloljon Komiljonov — 13 yoshli Frontend Developer (React, Next.js, TypeScript). 1 yillik tajriba va professional premium portfolio.",
   keywords: [
-    "Komiljonov Biloljon",
-    "Full-Stack Developer",
+    "Biloljon Komiljonov",
+    "Frontend Developer",
     "React Developer",
     "Next.js Developer",
-    "Node.js Developer",
+    "13 yoshli developer",
     "TypeScript",
-    "MongoDB",
-    "Express.js",
-    "AI Engineer",
     "Uzbekistan Developer",
   ],
-  authors: [{ name: "Akmal Mordayev" }],
+  authors: [{ name: "Biloljon Komiljonov" }],
   openGraph: {
-    title: "Akmal Mordayev — Full-Stack Developer",
+    title: "Biloljon Komiljonov — 13 yoshli Frontend Developer",
     description:
-      "4+ yillik tajriba. React, Next.js, Node.js, AI Engineering. Premium portfolio.",
+      "13 yoshli Frontend Developer (React, Next.js, TypeScript). Adminly loyihasi muallifi va professional portfolio.",
     type: "website",
   },
 };

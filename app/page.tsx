@@ -3,183 +3,7 @@
 import { useEffect, useRef, useCallback } from "react";
 
 export default function Home() {
-  const canvasRef = useRef<HTMLCanvasElement>(null);
-  const cursorRef = useRef<HTMLDivElement>(null);
-  const ringRef = useRef<HTMLDivElement>(null);
   const headerRef = useRef<HTMLElement>(null);
-
-  // ── STARS ANIMATION ──
-  useEffect(() => {
-    const canvas = canvasRef.current;
-    if (!canvas) return;
-    const ctx = canvas.getContext("2d");
-    if (!ctx) return;
-
-    let W = 0, H = 0;
-    interface Star {
-      x: number; y: number; r: number; alpha: number;
-      speed: number; twinkle: number; twinkleDir: number;
-      gold: boolean; shooting?: boolean; sx?: number; sy?: number; life?: number;
-    }
-    let stars: Star[] = [];
-    let shootingStars: Star[] = [];
-    let animId: number;
-
-    function resize() {
-      W = canvas!.width = window.innerWidth;
-      H = canvas!.height = window.innerHeight;
-    }
-    resize();
-    window.addEventListener("resize", resize);
-
-    function mkStar(): Star {
-      return {
-        x: Math.random() * W, y: Math.random() * H,
-        r: Math.random() * 1.8 + 0.2,
-        alpha: Math.random(),
-        speed: Math.random() * 0.25 + 0.03,
-        twinkle: Math.random() * 0.015 + 0.003,
-        twinkleDir: 1,
-        gold: Math.random() > 0.82,
-      };
-    }
-
-    for (let i = 0; i < 280; i++) stars.push(mkStar());
-
-    function spawnShootingStar() {
-      shootingStars.push({
-        x: Math.random() * W * 0.8, y: Math.random() * H * 0.3,
-        r: 2, alpha: 1,
-        speed: 0, twinkle: 0, twinkleDir: 0, gold: Math.random() > 0.5,
-        shooting: true,
-        sx: 4 + Math.random() * 6,
-        sy: 2 + Math.random() * 3,
-        life: 60 + Math.random() * 40,
-      });
-    }
-
-    let shootTimer = 0;
-
-    function draw() {
-      ctx!.clearRect(0, 0, W, H);
-
-      // Regular stars
-      stars.forEach(s => {
-        s.alpha += s.twinkle * s.twinkleDir;
-        if (s.alpha >= 1) { s.alpha = 1; s.twinkleDir = -1; }
-        if (s.alpha <= 0.05) { s.alpha = 0.05; s.twinkleDir = 1; }
-        s.y -= s.speed;
-        if (s.y < -2) { s.y = H + 2; s.x = Math.random() * W; }
-        ctx!.beginPath();
-        ctx!.arc(s.x, s.y, s.r, 0, Math.PI * 2);
-        if (s.gold) {
-          ctx!.fillStyle = `rgba(201,168,76,${s.alpha})`;
-          // Gold glow
-          ctx!.shadowColor = "rgba(201,168,76,0.5)";
-          ctx!.shadowBlur = 6;
-        } else {
-          ctx!.fillStyle = `rgba(200,210,255,${s.alpha * 0.7})`;
-          ctx!.shadowColor = "transparent";
-          ctx!.shadowBlur = 0;
-        }
-        ctx!.fill();
-        ctx!.shadowBlur = 0;
-      });
-
-      // Shooting stars
-      shootingStars = shootingStars.filter(s => {
-        if (!s.life || s.life <= 0) return false;
-        s.life--;
-        s.x += s.sx!;
-        s.y += s.sy!;
-        s.alpha = s.life / 100;
-
-        // Trail
-        const gradient = ctx!.createLinearGradient(s.x, s.y, s.x - s.sx! * 12, s.y - s.sy! * 12);
-        gradient.addColorStop(0, s.gold ? `rgba(201,168,76,${s.alpha})` : `rgba(0,212,255,${s.alpha})`);
-        gradient.addColorStop(1, "transparent");
-        ctx!.beginPath();
-        ctx!.moveTo(s.x, s.y);
-        ctx!.lineTo(s.x - s.sx! * 12, s.y - s.sy! * 12);
-        ctx!.strokeStyle = gradient;
-        ctx!.lineWidth = 1.5;
-        ctx!.stroke();
-
-        // Head
-        ctx!.beginPath();
-        ctx!.arc(s.x, s.y, 1.5, 0, Math.PI * 2);
-        ctx!.fillStyle = s.gold ? `rgba(255,224,154,${s.alpha})` : `rgba(126,255,245,${s.alpha})`;
-        ctx!.fill();
-
-        return s.life > 0;
-      });
-
-      shootTimer++;
-      if (shootTimer > 180 + Math.random() * 300) {
-        spawnShootingStar();
-        shootTimer = 0;
-      }
-
-      animId = requestAnimationFrame(draw);
-    }
-    draw();
-
-    return () => {
-      cancelAnimationFrame(animId);
-      window.removeEventListener("resize", resize);
-    };
-  }, []);
-
-  // ── CUSTOM CURSOR ──
-  useEffect(() => {
-    const cursor = cursorRef.current;
-    const ring = ringRef.current;
-    if (!cursor || !ring) return;
-
-    let mx = 0, my = 0, rx = 0, ry = 0;
-    let animId: number;
-
-    function onMove(e: MouseEvent) {
-      mx = e.clientX; my = e.clientY;
-      cursor!.style.left = mx + "px";
-      cursor!.style.top = my + "px";
-    }
-    document.addEventListener("mousemove", onMove);
-
-    function animRing() {
-      rx += (mx - rx) * 0.12;
-      ry += (my - ry) * 0.12;
-      ring!.style.left = rx + "px";
-      ring!.style.top = ry + "px";
-      animId = requestAnimationFrame(animRing);
-    }
-    animRing();
-
-    const interactiveEls = document.querySelectorAll("a, button, .tech-item, .project-card, .company-card");
-    const enterHandler = () => {
-      cursor!.style.transform = "translate(-50%,-50%) scale(2.5)";
-      ring!.style.transform = "translate(-50%,-50%) scale(1.5)";
-      ring!.style.borderColor = "rgba(201,168,76,0.8)";
-    };
-    const leaveHandler = () => {
-      cursor!.style.transform = "translate(-50%,-50%) scale(1)";
-      ring!.style.transform = "translate(-50%,-50%) scale(1)";
-      ring!.style.borderColor = "rgba(201,168,76,0.5)";
-    };
-    interactiveEls.forEach(el => {
-      el.addEventListener("mouseenter", enterHandler);
-      el.addEventListener("mouseleave", leaveHandler);
-    });
-
-    return () => {
-      document.removeEventListener("mousemove", onMove);
-      cancelAnimationFrame(animId);
-      interactiveEls.forEach(el => {
-        el.removeEventListener("mouseenter", enterHandler);
-        el.removeEventListener("mouseleave", leaveHandler);
-      });
-    };
-  }, []);
 
   // ── HEADER SCROLL ──
   useEffect(() => {
@@ -190,79 +14,6 @@ export default function Home() {
     }
     window.addEventListener("scroll", onScroll);
     return () => window.removeEventListener("scroll", onScroll);
-  }, []);
-
-  // ── REVEAL ON SCROLL ──
-  useEffect(() => {
-    const revealEls = document.querySelectorAll(".reveal");
-    const obs = new IntersectionObserver(
-      (entries) => {
-        entries.forEach((e, i) => {
-          if (e.isIntersecting) {
-            setTimeout(() => e.target.classList.add("visible"), i * 60);
-            obs.unobserve(e.target);
-          }
-        });
-      },
-      { threshold: 0.12, rootMargin: "0px 0px -40px 0px" }
-    );
-    revealEls.forEach((el) => obs.observe(el));
-    return () => obs.disconnect();
-  }, []);
-
-  // ── SKILL BARS ──
-  useEffect(() => {
-    const barObs = new IntersectionObserver(
-      (entries) => {
-        entries.forEach((e) => {
-          if (e.isIntersecting) {
-            const fill = e.target.querySelector(".skill-bar-fill") as HTMLElement;
-            if (fill) {
-              setTimeout(() => {
-                fill.style.width = fill.dataset.width || "0%";
-              }, 200);
-            }
-            barObs.unobserve(e.target);
-          }
-        });
-      },
-      { threshold: 0.3 }
-    );
-    document.querySelectorAll(".skill-bar-wrap").forEach((el) => barObs.observe(el));
-    return () => barObs.disconnect();
-  }, []);
-
-  // ── COUNTER ANIMATION ──
-  useEffect(() => {
-    function animCount(el: Element, target: number) {
-      const dur = 1500;
-      const startTime = performance.now();
-      function step(now: number) {
-        const progress = Math.min((now - startTime) / dur, 1);
-        const eased = 1 - Math.pow(1 - progress, 4);
-        const val = Math.floor(eased * target);
-        el.textContent = val + "+";
-        if (progress < 1) requestAnimationFrame(step);
-      }
-      requestAnimationFrame(step);
-    }
-
-    const countObs = new IntersectionObserver(
-      (entries) => {
-        entries.forEach((e) => {
-          if (e.isIntersecting) {
-            const text = e.target.textContent || "";
-            if (text.includes("∞")) return;
-            const num = parseInt(text);
-            if (!isNaN(num)) animCount(e.target, num);
-            countObs.unobserve(e.target);
-          }
-        });
-      },
-      { threshold: 0.5 }
-    );
-    document.querySelectorAll(".stat-num").forEach((el) => countObs.observe(el));
-    return () => countObs.disconnect();
   }, []);
 
   // ── SMOOTH NAV ──
@@ -299,74 +50,6 @@ export default function Home() {
     }
   }, []);
 
-  // ── Particle mouse follow effect ──
-  useEffect(() => {
-    const particles: { x: number; y: number; vx: number; vy: number; life: number; gold: boolean }[] = [];
-    let animId: number;
-    let lastX = 0, lastY = 0;
-
-    function onMove(e: MouseEvent) {
-      const dx = e.clientX - lastX;
-      const dy = e.clientY - lastY;
-      const speed = Math.sqrt(dx * dx + dy * dy);
-      lastX = e.clientX;
-      lastY = e.clientY;
-
-      if (speed > 3) {
-        for (let i = 0; i < 2; i++) {
-          particles.push({
-            x: e.clientX + (Math.random() - 0.5) * 10,
-            y: e.clientY + (Math.random() - 0.5) * 10,
-            vx: (Math.random() - 0.5) * 2,
-            vy: (Math.random() - 0.5) * 2 - 1,
-            life: 30 + Math.random() * 20,
-            gold: Math.random() > 0.5,
-          });
-        }
-      }
-    }
-
-    document.addEventListener("mousemove", onMove);
-
-    const particleCanvas = document.getElementById("particle-canvas") as HTMLCanvasElement;
-    if (!particleCanvas) return;
-    const pCtx = particleCanvas.getContext("2d");
-
-    function resizeP() {
-      particleCanvas.width = window.innerWidth;
-      particleCanvas.height = window.innerHeight;
-    }
-    resizeP();
-    window.addEventListener("resize", resizeP);
-
-    function drawParticles() {
-      if (!pCtx) return;
-      pCtx.clearRect(0, 0, particleCanvas.width, particleCanvas.height);
-      for (let i = particles.length - 1; i >= 0; i--) {
-        const p = particles[i];
-        p.x += p.vx;
-        p.y += p.vy;
-        p.life--;
-        const alpha = p.life / 50;
-        pCtx.beginPath();
-        pCtx.arc(p.x, p.y, 1.5, 0, Math.PI * 2);
-        pCtx.fillStyle = p.gold
-          ? `rgba(201,168,76,${alpha})`
-          : `rgba(0,212,255,${alpha})`;
-        pCtx.fill();
-        if (p.life <= 0) particles.splice(i, 1);
-      }
-      animId = requestAnimationFrame(drawParticles);
-    }
-    drawParticles();
-
-    return () => {
-      document.removeEventListener("mousemove", onMove);
-      window.removeEventListener("resize", resizeP);
-      cancelAnimationFrame(animId);
-    };
-  }, []);
-
   return (
     <>
       <style>{`
@@ -396,33 +79,7 @@ export default function Home() {
           color: var(--text);
           font-family: 'Cabinet Grotesk', 'Inter', sans-serif;
           overflow-x: hidden;
-          cursor: none;
         }
-
-        /* ── CUSTOM CURSOR ── */
-        .cursor-dot {
-          position: fixed; width: 12px; height: 12px;
-          background: var(--gold); border-radius: 50%;
-          pointer-events: none; z-index: 9999;
-          transform: translate(-50%,-50%);
-          transition: transform 0.1s, background 0.2s;
-          mix-blend-mode: difference;
-        }
-        .cursor-ring {
-          position: fixed; width: 40px; height: 40px;
-          border: 1px solid rgba(201,168,76,0.5); border-radius: 50%;
-          pointer-events: none; z-index: 9998;
-          transform: translate(-50%,-50%);
-          transition: all 0.15s ease;
-        }
-
-        /* ── CANVAS LAYERS ── */
-        #stars-canvas, #particle-canvas {
-          position: fixed; top: 0; left: 0;
-          width: 100%; height: 100%;
-          z-index: 0; pointer-events: none;
-        }
-        #particle-canvas { z-index: 1; }
 
         /* ── NOISE OVERLAY ── */
         body::before {
@@ -490,7 +147,7 @@ export default function Home() {
         .hamburger {
           display: none;
           flex-direction: column; gap: 5px;
-          background: none; border: none; cursor: none;
+          background: none; border: none; cursor: pointer;
           z-index: 200; padding: 8px;
         }
         .hamburger span {
@@ -548,23 +205,17 @@ export default function Home() {
           width: 700px; height: 700px;
           background: radial-gradient(circle, rgba(201,168,76,0.08) 0%, transparent 70%);
           top: -200px; right: -200px;
-          animation: orbFloat1 8s ease-in-out infinite;
         }
         .orb2 {
           width: 500px; height: 500px;
           background: radial-gradient(circle, rgba(0,212,255,0.06) 0%, transparent 70%);
           bottom: -100px; left: -100px;
-          animation: orbFloat2 10s ease-in-out infinite;
         }
         .orb3 {
           width: 400px; height: 400px;
           background: radial-gradient(circle, rgba(168,85,247,0.05) 0%, transparent 70%);
           top: 50%; left: 50%; transform: translate(-50%,-50%);
-          animation: orbFloat3 12s ease-in-out infinite;
         }
-        @keyframes orbFloat1 { 0%,100%{transform:translate(0,0)} 50%{transform:translate(-30px,30px)} }
-        @keyframes orbFloat2 { 0%,100%{transform:translate(0,0)} 50%{transform:translate(30px,-20px)} }
-        @keyframes orbFloat3 { 0%,100%{transform:translate(-50%,-50%) scale(1)} 50%{transform:translate(-45%,-55%) scale(1.1)} }
 
         .hero-content { max-width: 900px; position: relative; }
         .hero-tag {
@@ -575,15 +226,12 @@ export default function Home() {
           padding: 6px 16px; border-radius: 100px;
           background: rgba(201,168,76,0.05);
           margin-bottom: 32px;
-          animation: fadeUp 0.8s ease both;
         }
         .hero-tag::before {
           content: ''; width: 6px; height: 6px;
           background: var(--gold); border-radius: 50%;
-          animation: pulse 2s infinite;
           flex-shrink: 0;
         }
-        @keyframes pulse { 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:0.4;transform:scale(0.8)} }
 
         .hero-name {
           font-family: 'Syne', sans-serif;
@@ -592,7 +240,6 @@ export default function Home() {
           line-height: 0.95;
           letter-spacing: -3px;
           margin-bottom: 8px;
-          animation: fadeUp 0.8s 0.1s ease both;
         }
         .hero-name .first { color: var(--text); }
         .hero-name .last {
@@ -600,32 +247,20 @@ export default function Home() {
           background: linear-gradient(135deg, var(--gold) 0%, var(--gold3) 30%, var(--cyan) 70%, var(--purple) 100%);
           -webkit-background-clip: text; -webkit-text-fill-color: transparent;
           background-size: 300% 300%;
-          animation: gradShift 5s ease infinite, fadeUp 0.8s 0.2s ease both;
         }
-        @keyframes gradShift { 0%,100%{background-position:0% 50%} 50%{background-position:100% 50%} }
 
         .hero-title {
           font-family: 'DM Mono', monospace;
           font-size: 18px; color: var(--cyan);
           letter-spacing: 1px; margin: 24px 0 20px;
-          animation: fadeUp 0.8s 0.3s ease both;
         }
-        .hero-title .typing-cursor {
-          display: inline-block; width: 2px; height: 1em;
-          background: var(--cyan); margin-left: 4px;
-          animation: blink 1s step-end infinite;
-          vertical-align: text-bottom;
-        }
-        @keyframes blink { 0%,100%{opacity:1} 50%{opacity:0} }
 
         .hero-desc {
           font-size: 17px; color: var(--text2); line-height: 1.7;
           max-width: 580px; margin-bottom: 48px;
-          animation: fadeUp 0.8s 0.4s ease both;
         }
         .hero-stats {
           display: flex; gap: 48px; margin-bottom: 48px;
-          animation: fadeUp 0.8s 0.5s ease both;
         }
         .stat-item { text-align: center; }
         .stat-num {
@@ -641,14 +276,13 @@ export default function Home() {
         }
         .hero-actions {
           display: flex; gap: 16px; flex-wrap: wrap;
-          animation: fadeUp 0.8s 0.6s ease both;
         }
         .btn-primary {
           display: inline-flex; align-items: center; gap: 10px;
           background: linear-gradient(135deg, var(--gold), #a07828);
           color: #050508; font-weight: 700; font-size: 14px;
           padding: 14px 28px; border-radius: 8px; text-decoration: none;
-          border: none; cursor: none; letter-spacing: 0.3px;
+          border: none; cursor: pointer; letter-spacing: 0.3px;
           transition: all 0.3s; box-shadow: 0 8px 32px rgba(201,168,76,0.3);
           position: relative; overflow: hidden;
         }
@@ -664,7 +298,7 @@ export default function Home() {
           background: transparent; color: var(--text);
           font-size: 14px; font-weight: 500;
           padding: 14px 28px; border-radius: 8px; text-decoration: none;
-          border: 1px solid var(--border2); cursor: none;
+          border: 1px solid var(--border2); cursor: pointer;
           transition: all 0.3s; backdrop-filter: blur(8px);
         }
         .btn-secondary:hover { border-color: var(--cyan); color: var(--cyan); transform: translateY(-3px); box-shadow: 0 8px 32px rgba(0,212,255,0.15); }
@@ -674,16 +308,11 @@ export default function Home() {
           display: flex; flex-direction: column; align-items: center; gap: 8px;
           color: var(--text3); font-family: 'DM Mono', monospace; font-size: 11px;
           letter-spacing: 2px; text-transform: uppercase;
-          animation: fadeUp 1s 1s ease both;
         }
         .scroll-line {
           width: 1px; height: 60px;
           background: linear-gradient(to bottom, var(--gold), transparent);
-          animation: scrollLine 2s ease-in-out infinite;
         }
-        @keyframes scrollLine { 0%{transform:scaleY(0);transform-origin:top} 50%{transform:scaleY(1);transform-origin:top} 51%{transform:scaleY(1);transform-origin:bottom} 100%{transform:scaleY(0);transform-origin:bottom} }
-
-        @keyframes fadeUp { from{opacity:0;transform:translateY(30px)} to{opacity:1;transform:translateY(0)} }
 
         /* ── SECTION COMMON ── */
         .section-wrap { padding: 120px 80px; }
@@ -722,7 +351,7 @@ export default function Home() {
           border: 1px solid var(--border);
           border-radius: 12px; padding: 20px 24px;
           display: flex; align-items: center; gap: 16px;
-          transition: all 0.3s; cursor: none;
+          transition: all 0.3s; cursor: pointer;
         }
         .about-card:hover {
           border-color: rgba(201,168,76,0.4);
@@ -766,7 +395,7 @@ export default function Home() {
           padding: 16px 12px;
           display: flex; flex-direction: column; align-items: center; gap: 10px;
           transition: all 0.3s; position: relative; overflow: hidden;
-          cursor: none;
+          cursor: pointer;
         }
         .tech-item::before {
           content: ''; position: absolute; inset: 0;
@@ -783,30 +412,6 @@ export default function Home() {
         }
         .tech-level-fill { height: 100%; border-radius: 1px; background: linear-gradient(to right, var(--gold), var(--cyan)); }
 
-        /* ── EXPERIENCE ── */
-        #experience { background: var(--bg2); }
-        .exp-timeline { position: relative; }
-        .exp-timeline::before {
-          content: ''; position: absolute; left: 0; top: 0; bottom: 0;
-          width: 1px; background: linear-gradient(to bottom, var(--gold), var(--purple), transparent);
-        }
-        .exp-item {
-          padding: 0 0 56px 40px; position: relative;
-        }
-        .exp-item::before {
-          content: ''; position: absolute; left: -5px; top: 4px;
-          width: 11px; height: 11px; border-radius: 50%;
-          background: var(--gold); box-shadow: 0 0 20px rgba(201,168,76,0.5), 0 0 40px rgba(201,168,76,0.2);
-        }
-        .exp-period {
-          font-family: 'DM Mono', monospace; font-size: 12px; color: var(--gold);
-          letter-spacing: 1px; margin-bottom: 8px;
-        }
-        .exp-role { font-family: 'Syne', sans-serif; font-size: 22px; font-weight: 700; color: var(--text); margin-bottom: 4px; }
-        .exp-company { font-size: 14px; color: var(--cyan); font-weight: 500; margin-bottom: 12px; }
-        .exp-desc { color: var(--text2); line-height: 1.7; font-size: 15px; max-width: 560px; }
-        .exp-tags { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 12px; }
-
         /* ── PROJECTS ── */
         #projects { background: var(--bg); }
         .projects-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(340px, 1fr)); gap: 24px; }
@@ -814,7 +419,7 @@ export default function Home() {
           background: var(--surface);
           border: 1px solid var(--border);
           border-radius: 16px; overflow: hidden;
-          transition: all 0.4s; cursor: none;
+          transition: all 0.4s; cursor: pointer;
           position: relative;
         }
         .project-card::before {
@@ -859,30 +464,6 @@ export default function Home() {
         }
         .project-link:hover { gap: 10px; }
 
-        /* ── COMPANIES ── */
-        #companies { background: var(--bg2); }
-        .companies-row {
-          display: flex; gap: 16px; flex-wrap: wrap;
-        }
-        .company-card {
-          flex: 1 1 220px;
-          background: var(--surface);
-          border: 1px solid var(--border);
-          border-radius: 16px; padding: 32px 28px;
-          transition: all 0.35s; cursor: none; position: relative; overflow: hidden;
-        }
-        .company-card::after {
-          content: ''; position: absolute; top: 0; left: 0; right: 0; height: 2px;
-          background: linear-gradient(to right, var(--gold), var(--cyan), var(--purple));
-          transform: scaleX(0); transform-origin: left; transition: transform 0.35s;
-        }
-        .company-card:hover { border-color: rgba(201,168,76,0.3); transform: translateY(-6px); box-shadow: 0 16px 48px rgba(0,0,0,0.4); }
-        .company-card:hover::after { transform: scaleX(1); }
-        .company-emoji { font-size: 32px; margin-bottom: 16px; }
-        .company-name { font-family: 'Syne', sans-serif; font-size: 18px; font-weight: 700; margin-bottom: 6px; }
-        .company-role { font-family: 'DM Mono', monospace; font-size: 12px; color: var(--gold); letter-spacing: 0.5px; margin-bottom: 10px; }
-        .company-desc { color: var(--text2); font-size: 13px; line-height: 1.6; }
-
         /* ── SKILLS ── */
         #skills { background: var(--bg); }
         .skills-cols { display: grid; grid-template-columns: 1fr 1fr; gap: 48px; }
@@ -892,7 +473,7 @@ export default function Home() {
         .skill-bar-name { font-size: 14px; color: var(--text); }
         .skill-bar-pct { font-family: 'DM Mono', monospace; font-size: 12px; color: var(--gold); }
         .skill-bar { height: 3px; background: var(--surface2); border-radius: 2px; overflow: hidden; }
-        .skill-bar-fill { height: 100%; border-radius: 2px; background: linear-gradient(to right, var(--gold), var(--cyan)); width: 0; transition: width 1.2s cubic-bezier(.16,1,.3,1); }
+        .skill-bar-fill { height: 100%; border-radius: 2px; background: linear-gradient(to right, var(--gold), var(--cyan)); }
 
         /* ── CONTACT ── */
         #contact { background: var(--bg2); overflow: hidden; }
@@ -983,22 +564,10 @@ export default function Home() {
           display: flex; align-items: center; gap: 8px;
           font-family: 'DM Mono', monospace; font-size: 12px; color: var(--text3);
         }
-        .status-dot { width: 8px; height: 8px; border-radius: 50%; background: #22c55e; animation: pulse 2s infinite; box-shadow: 0 0 12px rgba(34,197,94,0.5); }
-
-        /* ── REVEAL ── */
-        .reveal { opacity: 0; transform: translateY(40px); transition: all 0.8s cubic-bezier(.16,1,.3,1); }
-        .reveal.visible { opacity: 1; transform: translateY(0); }
-
-        /* ── GLOWING BORDER ANIMATION ── */
-        @keyframes borderGlow {
-          0%, 100% { border-color: rgba(201,168,76,0.2); }
-          50% { border-color: rgba(0,212,255,0.3); }
-        }
+        .status-dot { width: 8px; height: 8px; border-radius: 50%; background: #22c55e; box-shadow: 0 0 12px rgba(34,197,94,0.5); }
 
         /* ── MOBILE ── */
         @media (max-width: 768px) {
-          body { cursor: auto; }
-          .cursor-dot, .cursor-ring { display: none; }
           header { padding: 0 24px; }
           nav { display: none; }
           .hamburger { display: flex; }
@@ -1016,7 +585,6 @@ export default function Home() {
           .divider { margin: 0 24px; }
           .projects-grid { grid-template-columns: 1fr; }
           .footer-bottom { flex-direction: column; gap: 12px; text-align: center; }
-          .companies-row { flex-direction: column; }
         }
         @media (max-width: 480px) {
           .footer-top { grid-template-columns: 1fr; gap: 24px; }
@@ -1025,23 +593,13 @@ export default function Home() {
         }
       `}</style>
 
-      {/* Cursor */}
-      <div ref={cursorRef} className="cursor-dot" />
-      <div ref={ringRef} className="cursor-ring" />
-
-      {/* Stars */}
-      <canvas ref={canvasRef} id="stars-canvas" />
-      <canvas id="particle-canvas" />
-
       {/* HEADER */}
       <header ref={headerRef} id="header">
-        <a href="#" className="logo">AM<span>.</span></a>
+        <a href="#" className="logo">Kb<span>.</span></a>
         <nav>
           <a href="#about" onClick={handleNavClick}>About</a>
           <a href="#stack" onClick={handleNavClick}>Stack</a>
-          <a href="#experience" onClick={handleNavClick}>Experience</a>
           <a href="#projects" onClick={handleNavClick}>Projects</a>
-          <a href="#companies" onClick={handleNavClick}>Companies</a>
           <a href="#skills" onClick={handleNavClick}>Skills</a>
           <a href="#contact" onClick={handleNavClick} className="nav-cta">Hire Me →</a>
         </nav>
@@ -1054,9 +612,7 @@ export default function Home() {
       <div ref={mobileMenuRef} className="mobile-nav">
         <a href="#about" onClick={(e) => { handleNavClick(e); closeMenu(); }}>About</a>
         <a href="#stack" onClick={(e) => { handleNavClick(e); closeMenu(); }}>Stack</a>
-        <a href="#experience" onClick={(e) => { handleNavClick(e); closeMenu(); }}>Experience</a>
         <a href="#projects" onClick={(e) => { handleNavClick(e); closeMenu(); }}>Projects</a>
-        <a href="#companies" onClick={(e) => { handleNavClick(e); closeMenu(); }}>Companies</a>
         <a href="#skills" onClick={(e) => { handleNavClick(e); closeMenu(); }}>Skills</a>
         <a href="#contact" onClick={(e) => { handleNavClick(e); closeMenu(); }}>Contact</a>
       </div>
@@ -1074,29 +630,23 @@ export default function Home() {
               <span className="last">Komiljonov</span>
             </h1>
             <p className="hero-title">
-              {"// Full-Stack Developer · AI Engineer · Startuper"}
-              <span className="typing-cursor" />
+              {"// HTML · JavaScript · TypeScript Frontend Developer"}
             </p>
             <p className="hero-desc">
-              4+ yillik tajriba bilan React, Next.js, Node.js va AI texnologiyalari bo&apos;yicha
-              premium mahsulotlar yarataman. Freelance dan tortib Mars IT gacha — har bir
-              proyektda professional darajada o&apos;z izimni qoldiraman.
+              HTML, JavaScript va TypeScript texnologiyalari bo&apos;yicha
+              premium frontend interfeyslar yarataman. Har bir proyektda professional darajada o&apos;z izimni qoldiraman.
             </p>
             <div className="hero-stats">
               <div className="stat-item">
-                <div className="stat-num">4+</div>
-                <div className="stat-label">Years Exp</div>
+                <div className="stat-num">1+</div>
+                <div className="stat-label">Year Exp</div>
               </div>
               <div className="stat-item">
-                <div className="stat-num">12+</div>
-                <div className="stat-label">Projects</div>
+                <div className="stat-num">1+</div>
+                <div className="stat-label">Project</div>
               </div>
               <div className="stat-item">
-                <div className="stat-num">3</div>
-                <div className="stat-label">Companies</div>
-              </div>
-              <div className="stat-item">
-                <div className="stat-num">∞</div>
+                <div className="stat-num">10+</div>
                 <div className="stat-label">Ideas</div>
               </div>
             </div>
@@ -1118,45 +668,45 @@ export default function Home() {
           <div className="section-wrap">
             <div className="section-tag">01 — About Me</div>
             <h2 className="section-title">Men <em>haqimda</em></h2>
-            <p className="section-sub">Biloljon Komiljonov — professional Full-Stack Developer va AI Engineer.</p>
+            <p className="section-sub">Biloljon Komiljonov — React, Next.js va TypeScript Developer.</p>
             <div className="about-grid">
               <div className="about-info-cards">
-                <div className="about-card reveal">
+                <div className="about-card">
                   <div className="about-card-icon">👤</div>
                   <div>
                     <div className="about-card-label">Full Name</div>
                     <div className="about-card-value">Biloljon Komiljonov</div>
                   </div>
                 </div>
-                <div className="about-card reveal">
+                <div className="about-card">
                   <div className="about-card-icon">🎂</div>
                   <div>
                     <div className="about-card-label">Age</div>
-                    <div className="about-card-value">22 yosh</div>
+                    <div className="about-card-value">13 yosh</div>
                   </div>
                 </div>
-                <div className="about-card reveal">
+                <div className="about-card">
                   <div className="about-card-icon">💼</div>
                   <div>
                     <div className="about-card-label">Profession</div>
-                    <div className="about-card-value">Full-Stack Developer (React + Next.js + Node.js)</div>
+                    <div className="about-card-value">Frontend Developer (React + Next.js + TypeScript)</div>
                   </div>
                 </div>
-                <div className="about-card reveal">
+                <div className="about-card">
                   <div className="about-card-icon">📧</div>
                   <div>
                     <div className="about-card-label">Email</div>
                     <div className="about-card-value">b23064155@gmail.com</div>
                   </div>
                 </div>
-                <div className="about-card reveal">
+                <div className="about-card">
                   <div className="about-card-icon">📱</div>
                   <div>
                     <div className="about-card-label">Phone</div>
                     <div className="about-card-value">+998 95 020 51 61</div>
                   </div>
                 </div>
-                <div className="about-card reveal">
+                <div className="about-card">
                   <div className="about-card-icon">📍</div>
                   <div>
                     <div className="about-card-label">Location</div>
@@ -1164,27 +714,18 @@ export default function Home() {
                   </div>
                 </div>
               </div>
-              <div className="reveal">
+              <div>
                 <p className="about-text">
-                  Men <strong>Biloljon Komiljonov</strong> — 22 yoshli Full-Stack Developer va AI Engineer.
-                  4+ yillik tajribam davomida <strong>React, Next.js, Node.js, TypeScript, Express.js, MongoDB</strong> va
-                  ko&apos;plab zamonaviy texnologiyalar bilan ishlagan holda real-world loyihalar yaratib kelaman.
-                </p>
-                <p className="about-text" style={{ marginTop: "16px" }}>
-                  <strong>Freelance, Albison, Mars IT</strong> kabi kompaniyalarda ishlash tajribam bor.
-                  Shu paytgacha juda ko&apos;p muvaffaqiyatli proyektlarda qatnashganman — <strong>Adminly, Dachago.uz,
-                  Adblogger.uz, Stilzone.uz, Alximik.uz, Elevato.uz</strong> va boshqalar.
-                </p>
-                <p className="about-text" style={{ marginTop: "16px" }}>
-                  AI engineering va startup sohasida ham faol bo&apos;lib, zamonaviy AI texnologiyalarini amaliy
-                  loyihalarga tatbiq etaman.
+                  Men <strong>Biloljon Komiljonov</strong> — 13 yoshli Frontend Developer.
+                  Tajribam davomida <strong>React, Next.js, TypeScript</strong> va
+                  ko&apos;plab zamonaviy texnologiyalar bilan ishlagan holda <strong>Adminly</strong> loyihasini yaratganman.
                 </p>
                 <div className="about-highlight">
                   <span style={{ color: "var(--gold)" }}>const</span> biloljon = &#123;<br />
                   &nbsp;&nbsp;name: <span style={{ color: "var(--gold3)" }}>&quot;Biloljon Komiljonov&quot;</span>,<br />
-                  &nbsp;&nbsp;age: <span style={{ color: "var(--cyan)" }}>22</span>,<br />
-                  &nbsp;&nbsp;role: <span style={{ color: "var(--gold3)" }}>&quot;Full-Stack Developer&quot;</span>,<br />
-                  &nbsp;&nbsp;experience: <span style={{ color: "var(--cyan)" }}>&quot;4+ years&quot;</span>,<br />
+                  &nbsp;&nbsp;age: <span style={{ color: "var(--cyan)" }}>13</span>,<br />
+                  &nbsp;&nbsp;role: <span style={{ color: "var(--gold3)" }}>&quot;Frontend Developer&quot;</span>,<br />
+                  &nbsp;&nbsp;experience: <span style={{ color: "var(--cyan)" }}>&quot;1 year&quot;</span>,<br />
                   &nbsp;&nbsp;passion: <span style={{ color: "var(--gold3)" }}>&quot;Building the future with code&quot;</span><br />
                   &#125;;
                 </div>
@@ -1206,25 +747,11 @@ export default function Home() {
                 { icon: "⚛️", name: "React", level: 96 },
                 { icon: "▲", name: "Next.js", level: 94 },
                 { icon: "🟦", name: "TypeScript", level: 92 },
-                { icon: "🟢", name: "Node.js", level: 91 },
-                { icon: "🚂", name: "Express.js", level: 90 },
-                { icon: "🍃", name: "MongoDB", level: 88 },
-                { icon: "🔴", name: "Redis", level: 80 },
-                { icon: "🐘", name: "PostgreSQL", level: 82 },
                 { icon: "🎨", name: "Tailwind CSS", level: 95 },
-                { icon: "🐳", name: "Docker", level: 78 },
-                { icon: "🤖", name: "AI / ML", level: 85 },
-                { icon: "🔗", name: "GraphQL", level: 76 },
-                { icon: "📦", name: "Zustand", level: 89 },
-                { icon: "🔄", name: "React Query", level: 87 },
-                { icon: "☁️", name: "AWS / Vercel", level: 75 },
-                { icon: "🔐", name: "JWT / Auth", level: 92 },
-                { icon: "🧪", name: "Jest / Testing", level: 80 },
-                { icon: "📡", name: "Socket.io", level: 83 },
-                { icon: "🎭", name: "Prisma ORM", level: 86 },
-                { icon: "⚡", name: "Vite", level: 88 },
+                { icon: "📜", name: "JavaScript", level: 94 },
+                { icon: "🌐", name: "HTML5 & CSS3", level: 97 },
               ].map((tech) => (
-                <div key={tech.name} className="tech-item reveal">
+                <div key={tech.name} className="tech-item">
                   <div className="tech-icon">{tech.icon}</div>
                   <div className="tech-name">{tech.name}</div>
                   <div className="tech-level">
@@ -1238,84 +765,10 @@ export default function Home() {
 
         <div className="divider" />
 
-        {/* ── EXPERIENCE ── */}
-        <section id="experience">
-          <div className="section-wrap">
-            <div className="section-tag">03 — Experience</div>
-            <h2 className="section-title">Ish <em>tarixi</em></h2>
-            <p className="section-sub">4+ yil davomida turli kompaniyalar va freelance loyihalarda o&apos;z tajribamni oshirdim.</p>
-            <div className="exp-timeline">
-              <div className="exp-item reveal">
-                <div className="exp-period">2024 — Present</div>
-                <div className="exp-role">Senior Full-Stack Developer</div>
-                <div className="exp-company">Mars IT</div>
-                <div className="exp-desc">
-                  Next.js va Node.js asosidagi enterprise-darajali ilovalar yaratish.
-                  Microservices arxitekturasi, CI/CD pipeline sozlash va junior
-                  developerlarni mentoring qilish.
-                </div>
-                <div className="exp-tags">
-                  <span className="tag">Next.js</span>
-                  <span className="tag">Node.js</span>
-                  <span className="tag">Microservices</span>
-                  <span className="tag">CI/CD</span>
-                </div>
-              </div>
-              <div className="exp-item reveal">
-                <div className="exp-period">2023 — 2024</div>
-                <div className="exp-role">Full-Stack Developer</div>
-                <div className="exp-company">Albison</div>
-                <div className="exp-desc">
-                  React va TypeScript bilan complex SPA loyihalar. RESTful API va
-                  GraphQL endpointlar yaratish. MongoDB va PostgreSQL bilan ishlash tajribasi.
-                </div>
-                <div className="exp-tags">
-                  <span className="tag">React</span>
-                  <span className="tag">TypeScript</span>
-                  <span className="tag">GraphQL</span>
-                  <span className="tag">MongoDB</span>
-                </div>
-              </div>
-              <div className="exp-item reveal">
-                <div className="exp-period">2021 — Present</div>
-                <div className="exp-role">Freelance Developer & AI Engineer</div>
-                <div className="exp-company">Self-Employed / Upwork / Telegram</div>
-                <div className="exp-desc">
-                  20+ ta muvaffaqiyatli loyiha. E-commerce, dashboard, AI chatbot va
-                  avtomatlashtirish tizimlari yaratish. OpenAI API va LangChain bilan
-                  AI mahsulotlar ishlab chiqish.
-                </div>
-                <div className="exp-tags">
-                  <span className="tag">Freelance</span>
-                  <span className="tag">AI</span>
-                  <span className="tag">E-commerce</span>
-                  <span className="tag">OpenAI</span>
-                </div>
-              </div>
-              <div className="exp-item reveal">
-                <div className="exp-period">2021 — 2022</div>
-                <div className="exp-role">Junior Developer</div>
-                <div className="exp-company">Startup Projects</div>
-                <div className="exp-desc">
-                  Dastlabki ish tajribasi. React, CSS, JavaScript asoslarini amalda
-                  o&apos;rganish. Bir nechta startuplarda frontend va backend ishlarida qatnashish.
-                </div>
-                <div className="exp-tags">
-                  <span className="tag">React</span>
-                  <span className="tag">CSS</span>
-                  <span className="tag">JavaScript</span>
-                </div>
-              </div>
-            </div>
-          </div>
-        </section>
-
-        <div className="divider" />
-
         {/* ── PROJECTS ── */}
         <section id="projects">
           <div className="section-wrap">
-            <div className="section-tag">04 — Projects</div>
+            <div className="section-tag">03 — Projects</div>
             <h2 className="section-title">Mening <em>loyihalarim</em></h2>
             <p className="section-sub">Real world problems uchun real world solutions — har bir loyiha o&apos;z hikoyasiga ega.</p>
             <div className="projects-grid">
@@ -1323,41 +776,11 @@ export default function Home() {
                 {
                   icon: "🛒", name: "Adminly", badge: "Live",
                   desc: "E-commerce uchun kuchli admin panel. Real-time analytics, order management va inventory tracking tizimi bilan to'liq CMS.",
-                  tags: ["Next.js", "TypeScript", "MongoDB", "Tailwind"],
+                  tags: ["Next.js", "TypeScript", "React", "CSS"],
                   link: "https://adminly.uz",
                 },
-                {
-                  icon: "🏡", name: "Dachago.uz", badge: "Live",
-                  desc: "Dacha va ko'chmas mulk e'lonlari platformasi. Advanced filter, geo-location va xarita integratsiyasi.",
-                  tags: ["React", "Node.js", "Maps API", "Express"],
-                  link: "https://dachago.uz",
-                },
-                {
-                  icon: "📢", name: "Adblogger.uz", badge: "Live",
-                  desc: "Reklama va blogging platformasi. Content management, SEO optimization va monetization tizimi.",
-                  tags: ["Next.js", "SEO", "CMS", "PostgreSQL"],
-                  link: "https://adblogger.uz",
-                },
-                {
-                  icon: "👗", name: "Stilzone.uz", badge: "Live",
-                  desc: "Fashion e-commerce platforma. Virtual try-on, size recommendation va premium UI/UX dizayn.",
-                  tags: ["React", "TypeScript", "Stripe", "Redis"],
-                  link: "https://stilzone.uz",
-                },
-                {
-                  icon: "⚗️", name: "Alximik.uz", badge: "Live",
-                  desc: "Kimyo va fan bo'yicha ta'lim platformasi. Interactive laboratoriya simulatsiyalari va test tizimlari.",
-                  tags: ["Next.js", "Animation", "Node.js", "MongoDB"],
-                  link: "https://alximik.uz",
-                },
-                {
-                  icon: "🏢", name: "Elevato.uz", badge: "Live",
-                  desc: "Lift va elevator xizmatlari korporativ sayt. 3D animatsiyalar, online buyurtma va texnik xizmat tizimi.",
-                  tags: ["React", "Three.js", "GSAP", "Express"],
-                  link: "https://elevato.uz",
-                },
               ].map((project) => (
-                <div key={project.name} className="project-card reveal">
+                <div key={project.name} className="project-card">
                   <div className="project-header">
                     <div className="project-icon">{project.icon}</div>
                     <div className="project-badge">{project.badge}</div>
@@ -1380,115 +803,28 @@ export default function Home() {
 
         <div className="divider" />
 
-        {/* ── COMPANIES ── */}
-        <section id="companies">
-          <div className="section-wrap">
-            <div className="section-tag">05 — Companies</div>
-            <h2 className="section-title">Ishlagan <em>kompaniyalar</em></h2>
-            <p className="section-sub">Har bir kompaniya o&apos;z tajribasi va saboqlarini berdi.</p>
-            <div className="companies-row">
-              <div className="company-card reveal">
-                <div className="company-emoji">🚀</div>
-                <div className="company-name">Mars IT</div>
-                <div className="company-role">Senior Full-Stack Developer</div>
-                <div className="company-desc">Innovatsion IT kompaniya. Enterprise-level loyihalar va cutting-edge texnologiyalar bilan ishlash.</div>
-              </div>
-              <div className="company-card reveal">
-                <div className="company-emoji">💼</div>
-                <div className="company-name">Albison</div>
-                <div className="company-role">Full-Stack Developer</div>
-                <div className="company-desc">Professional development muhiti. Complex SPA va API integratsiyalari bo&apos;yicha chuqur tajriba.</div>
-              </div>
-              <div className="company-card reveal">
-                <div className="company-emoji">🌍</div>
-                <div className="company-name">Freelance</div>
-                <div className="company-role">Independent Developer</div>
-                <div className="company-desc">Global mijozlar bilan ishlash. 20+ ta muvaffaqiyatli loyiha va 100% client satisfaction.</div>
-              </div>
-              <div className="company-card reveal">
-                <div className="company-emoji">🤖</div>
-                <div className="company-name">AI Startup</div>
-                <div className="company-role">AI Engineer & Startuper</div>
-                <div className="company-desc">AI mahsulotlar yaratish, LLM fine-tuning va intelligent automation tizimlari.</div>
-              </div>
-            </div>
-          </div>
-        </section>
-
-        <div className="divider" />
-
         {/* ── SKILLS ── */}
         <section id="skills">
           <div className="section-wrap">
-            <div className="section-tag">06 — Skills</div>
+            <div className="section-tag">04 — Skills</div>
             <h2 className="section-title">Qobiliyat <em>darajam</em></h2>
-            <p className="section-sub">Frontend dan backend gacha, AI dan DevOps gacha — to&apos;liq stack.</p>
-            <div className="skills-cols">
+            <p className="section-sub">Frontend texnologiyalari bo&apos;yicha professional darajada mukammallik.</p>
+            <div className="skills-cols" style={{ gridTemplateColumns: "1fr", maxWidth: "600px", margin: "0 auto" }}>
               <div>
-                <div className="skill-group-title">⚡ Frontend</div>
+                <div className="skill-group-title">⚡ Core Frontend</div>
                 {[
-                  { name: "React / Next.js", pct: 96 },
+                  { name: "React & Next.js", pct: 96 },
                   { name: "TypeScript", pct: 92 },
-                  { name: "Tailwind / CSS", pct: 95 },
-                  { name: "Animations / GSAP", pct: 84 },
+                  { name: "JavaScript (ES6+)", pct: 94 },
+                  { name: "HTML5 & CSS3", pct: 97 },
                 ].map((s) => (
-                  <div key={s.name} className="skill-bar-wrap reveal">
+                  <div key={s.name} className="skill-bar-wrap">
                     <div className="skill-bar-top">
                       <span className="skill-bar-name">{s.name}</span>
                       <span className="skill-bar-pct">{s.pct}%</span>
                     </div>
                     <div className="skill-bar">
-                      <div className="skill-bar-fill" data-width={`${s.pct}%`} />
-                    </div>
-                  </div>
-                ))}
-                <div className="skill-group-title" style={{ marginTop: "32px" }}>🗄️ Backend</div>
-                {[
-                  { name: "Node.js / Express", pct: 91 },
-                  { name: "MongoDB / Redis", pct: 88 },
-                  { name: "PostgreSQL / Prisma", pct: 85 },
-                ].map((s) => (
-                  <div key={s.name} className="skill-bar-wrap reveal">
-                    <div className="skill-bar-top">
-                      <span className="skill-bar-name">{s.name}</span>
-                      <span className="skill-bar-pct">{s.pct}%</span>
-                    </div>
-                    <div className="skill-bar">
-                      <div className="skill-bar-fill" data-width={`${s.pct}%`} />
-                    </div>
-                  </div>
-                ))}
-              </div>
-              <div>
-                <div className="skill-group-title">🤖 AI & ML</div>
-                {[
-                  { name: "OpenAI API / LLMs", pct: 87 },
-                  { name: "LangChain / RAG", pct: 80 },
-                  { name: "AI Engineering", pct: 83 },
-                ].map((s) => (
-                  <div key={s.name} className="skill-bar-wrap reveal">
-                    <div className="skill-bar-top">
-                      <span className="skill-bar-name">{s.name}</span>
-                      <span className="skill-bar-pct">{s.pct}%</span>
-                    </div>
-                    <div className="skill-bar">
-                      <div className="skill-bar-fill" data-width={`${s.pct}%`} />
-                    </div>
-                  </div>
-                ))}
-                <div className="skill-group-title" style={{ marginTop: "32px" }}>🛠️ DevOps & Tools</div>
-                {[
-                  { name: "Docker / CI/CD", pct: 78 },
-                  { name: "AWS / Vercel", pct: 75 },
-                  { name: "Git / GitHub", pct: 93 },
-                ].map((s) => (
-                  <div key={s.name} className="skill-bar-wrap reveal">
-                    <div className="skill-bar-top">
-                      <span className="skill-bar-name">{s.name}</span>
-                      <span className="skill-bar-pct">{s.pct}%</span>
-                    </div>
-                    <div className="skill-bar">
-                      <div className="skill-bar-fill" data-width={`${s.pct}%`} />
+                      <div className="skill-bar-fill" style={{ width: `${s.pct}%` }} />
                     </div>
                   </div>
                 ))}
@@ -1502,10 +838,10 @@ export default function Home() {
         {/* ── CONTACT ── */}
         <section id="contact">
           <div className="section-wrap">
-            <div className="contact-inner reveal">
+            <div className="contact-inner">
               <div className="contact-grid">
                 <div>
-                  <div className="section-tag" style={{ marginBottom: "16px" }}>07 — Contact</div>
+                  <div className="section-tag" style={{ marginBottom: "16px" }}>05 — Contact</div>
                   <div className="contact-title">
                     Birgalikda{" "}
                     <em style={{
@@ -1570,7 +906,7 @@ export default function Home() {
           <div>
             <span className="footer-logo">Biloljon Komiljonov</span>
             <p className="footer-tagline">
-              Full-Stack Developer, AI Engineer va Startuper. Kelajakni kod bilan quraylik.
+              HTML, JavaScript va TypeScript Developer. Kelajakni kod bilan quraylik.
             </p>
             <div className="footer-socials">
               <a href="https://github.com/biloljonkomiljonov" target="_blank" rel="noopener noreferrer" className="footer-social">⌨️</a>
@@ -1584,9 +920,7 @@ export default function Home() {
             <ul className="footer-links">
               <li><a href="#about" onClick={handleNavClick}>About Me</a></li>
               <li><a href="#stack" onClick={handleNavClick}>Tech Stack</a></li>
-              <li><a href="#experience" onClick={handleNavClick}>Experience</a></li>
               <li><a href="#projects" onClick={handleNavClick}>Projects</a></li>
-              <li><a href="#companies" onClick={handleNavClick}>Companies</a></li>
               <li><a href="#skills" onClick={handleNavClick}>Skills</a></li>
             </ul>
           </div>
