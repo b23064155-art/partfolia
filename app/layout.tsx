@@ -4,7 +4,7 @@ import "./globals.css";
 export const metadata: Metadata = {
   title: "Biloljon Komiljonov — 13 yoshli Frontend Developer",
   description:
-    "Biloljon Komiljonov — 13 yoshli Frontend Developer (React, Next.js, TypeScript). 1 yillik tajriba va professional premium portfolio.",
+    "Biloljon Komiljonov — 13 yoshli Frontend Developer (React, Next.js, TypeScript). Adminly.uz CMS platformasi muallifi. Aloqa: +998 95 020 51 61 | b23064155@gmail.com",
   keywords: [
     "Biloljon Komiljonov",
     "Frontend Developer",
@@ -18,8 +18,10 @@ export const metadata: Metadata = {
   openGraph: {
     title: "Biloljon Komiljonov — 13 yoshli Frontend Developer",
     description:
-      "13 yoshli Frontend Developer (React, Next.js, TypeScript). Adminly loyihasi muallifi va professional portfolio.",
+      "Frontend yo'nalishida professional loyihalar yarataman. React, Next.js va TypeScript bo'yicha mustahkam bilimga egaman. Adminly.uz loyihasi muallifi. Tel: +998 95 020 51 61",
     type: "website",
+    siteName: "Biloljon Komiljonov Portfolio",
+    locale: "uz_UZ",
   },
 };
 
