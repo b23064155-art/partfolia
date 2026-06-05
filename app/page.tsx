@@ -54,23 +54,23 @@ export default function Home() {
     <>
       <style>{`
         :root {
-          --bg: #050508;
-          --bg2: #09090f;
-          --surface: #0f0f1a;
-          --surface2: #141428;
-          --gold: #c9a84c;
-          --gold2: #f0c96a;
-          --gold3: #ffe09a;
-          --cyan: #00d4ff;
-          --cyan2: #7efff5;
-          --purple: #a855f7;
-          --text: #e8e8f0;
-          --text2: #9898b8;
-          --text3: #5a5a7a;
-          --border: rgba(201,168,76,0.12);
-          --border2: rgba(0,212,255,0.1);
-          --glow: 0 0 60px rgba(201,168,76,0.15);
-          --glow2: 0 0 40px rgba(0,212,255,0.1);
+          --bg: #08080c;
+          --bg2: #0e0e14;
+          --surface: #14141b;
+          --surface2: #1d1d29;
+          --gold: #dcae4e;
+          --gold2: #e9c26f;
+          --gold3: #f5d796;
+          --cyan: #38bdf8;
+          --cyan2: #7dd3fc;
+          --purple: #a78bfa;
+          --text: #f4f4f5;
+          --text2: #a1a1aa;
+          --text3: #71717a;
+          --border: rgba(220, 174, 78, 0.1);
+          --border2: rgba(56, 189, 248, 0.1);
+          --glow: 0 0 60px rgba(220, 174, 78, 0.08);
+          --glow2: 0 0 40px rgba(56, 189, 248, 0.06);
         }
         *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
         html { scroll-behavior: smooth; }
@@ -203,17 +203,17 @@ export default function Home() {
         }
         .orb1 {
           width: 700px; height: 700px;
-          background: radial-gradient(circle, rgba(201,168,76,0.08) 0%, transparent 70%);
+          background: radial-gradient(circle, rgba(220,174,78,0.05) 0%, transparent 70%);
           top: -200px; right: -200px;
         }
         .orb2 {
           width: 500px; height: 500px;
-          background: radial-gradient(circle, rgba(0,212,255,0.06) 0%, transparent 70%);
+          background: radial-gradient(circle, rgba(56,189,248,0.04) 0%, transparent 70%);
           bottom: -100px; left: -100px;
         }
         .orb3 {
           width: 400px; height: 400px;
-          background: radial-gradient(circle, rgba(168,85,247,0.05) 0%, transparent 70%);
+          background: radial-gradient(circle, rgba(167,139,250,0.03) 0%, transparent 70%);
           top: 50%; left: 50%; transform: translate(-50%,-50%);
         }
 
