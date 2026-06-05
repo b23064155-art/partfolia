@@ -777,7 +777,7 @@ export default function Home() {
                   icon: "🛒", name: "Adminly", badge: "Live",
                   desc: "E-commerce uchun kuchli admin panel. Real-time analytics, order management va inventory tracking tizimi bilan to'liq CMS.",
                   tags: ["Next.js", "TypeScript", "React", "CSS"],
-                  link: "https://adminly.uz",
+                  link: "https://adminly-tan.vercel.app/auth/signin",
                 },
               ].map((project) => (
                 <div key={project.name} className="project-card">
