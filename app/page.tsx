@@ -16,6 +16,16 @@ export default function Home() {
     return () => window.removeEventListener("scroll", onScroll);
   }, []);
 
+  // ── MOUSE SPOTLIGHT EFFECT ──
+  useEffect(() => {
+    function onMouseMove(e: MouseEvent) {
+      document.documentElement.style.setProperty("--mouse-x", `${e.clientX}px`);
+      document.documentElement.style.setProperty("--mouse-y", `${e.clientY}px`);
+    }
+    window.addEventListener("mousemove", onMouseMove);
+    return () => window.removeEventListener("mousemove", onMouseMove);
+  }, []);
+
   // ── SMOOTH NAV ──
   const handleNavClick = useCallback((e: React.MouseEvent<HTMLAnchorElement>) => {
     const href = e.currentTarget.getAttribute("href");
@@ -93,11 +103,15 @@ export default function Home() {
           background: linear-gradient(180deg, var(--gold2), var(--cyan2));
         }
 
+        body, button, input, select, textarea {
+          font-family: 'Plus Jakarta Sans', sans-serif;
+        }
+
         body {
           background: var(--bg);
           color: var(--text);
-          font-family: 'Plus Jakarta Sans', sans-serif;
           overflow-x: hidden;
+          position: relative;
         }
 
         /* ── NOISE OVERLAY ── */
@@ -105,7 +119,15 @@ export default function Home() {
           content: '';
           position: fixed; inset: 0;
           background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.04'/%3E%3C/svg%3E");
-          pointer-events: none; z-index: 1; opacity: 0.4;
+          pointer-events: none; z-index: 10; opacity: 0.3;
+        }
+
+        /* ── MOUSE SPOTLIGHT OVERLAY ── */
+        body::after {
+          content: '';
+          position: fixed; inset: 0;
+          background: radial-gradient(800px circle at var(--mouse-x, 0px) var(--mouse-y, 0px), rgba(56, 189, 248, 0.05) 0%, rgba(167, 139, 250, 0.02) 40%, transparent 80%);
+          pointer-events: none; z-index: 1;
         }
 
         /* ── HEADER ── */
