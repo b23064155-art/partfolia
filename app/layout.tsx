@@ -1,12 +1,10 @@
 import type { Metadata } from "next";
 import "./globals.css";
 
-export const metadata: Metadata = {
-  title: "Biloljon Komiljonov — 13 yoshli Frontend Developer",
-  description:
-    "Biloljon Komiljonov — 13 yoshli Frontend Developer (React, Next.js, TypeScript). Adminly.uz CMS platformasi muallifi. Aloqa: +998 95 020 51 61 | b23064155@gmail.com",
+export const metadata = {
+  title: "Biloljon Komiljonov",
+  description: "Biloljon Komiljonov — 13 yoshli Frontend Developer (React, Next.js, TypeScript). Adminly.uz CMS platformasi muallifi. Aloqa: +998 95 020 51 61",
   keywords: [
-    "Biloljon Komiljonov",
     "Frontend Developer",
     "React Developer",
     "Next.js Developer",
@@ -14,14 +12,11 @@ export const metadata: Metadata = {
     "TypeScript",
     "Uzbekistan Developer",
   ],
-  authors: [{ name: "Biloljon Komiljonov" }],
   openGraph: {
-    title: "Biloljon Komiljonov — 13 yoshli Frontend Developer",
-    description:
-      "Frontend yo'nalishida professional loyihalar yarataman. React, Next.js va TypeScript bo'yicha mustahkam bilimga egaman. Adminly.uz loyihasi muallifi. Tel: +998 95 020 51 61",
-    type: "website",
-    siteName: "Biloljon Komiljonov Portfolio",
-    locale: "uz_UZ",
+    title: "Biloljon Komiljonov",
+    description: "Frontend yo'nalishida professional loyihalar yarataman. React, Next.js va TypeScript bo'yicha mustahkam bilimga egaman. Adminly.uz loyihasi muallifi. Tel: +998 95 020 51 61",
+    url: "https://portfolia.vercel.app/",
+    images: ["/og-image.png"],
   },
 };
 
