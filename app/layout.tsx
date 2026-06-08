@@ -17,5 +17,5 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
     <html lang="uz">
       <body>{children}</body>
     </html>
-  );
+  ); 
 }

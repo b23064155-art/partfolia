@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useCallback } from "react";
-
+ 
 export default function Home() {
   const headerRef = useRef<HTMLElement>(null);
 
